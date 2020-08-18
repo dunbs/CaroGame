@@ -5,7 +5,19 @@
  */
 package GUI;
 
+import client.Client;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Point;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.UnsupportedLookAndFeelException;
+import model.Coordinate;
+import model.Player;
+import model.UserDisconnected;
 
 /**
  *
@@ -13,20 +25,96 @@ import java.awt.CardLayout;
  */
 public class GameGUI extends javax.swing.JFrame {
 
+    public static final String TITLE = "Caro(%dx%d) You are playing against %s as %s";
+    public static final String CURRENT_USER_INFO = "%s: %s";
+
+    private Client client;
+    private CaroScene caroScene;
+    private Player player;
+    private final int size;
+    private int oneBlockSize;
+
+    private boolean myTurn;
+
     private void createGameScene() {
-        CaroScene caroScene = new CaroScene(10);
+        caroScene = new CaroScene(size);
         gameScene.setLayout(new CardLayout());
         gameScene.add(caroScene);
-        this.revalidate();
-        this.repaint();
+
+        myTurn = player.isInitiate();
+
+        // Title
+        this.setTitle(String.format(TITLE, size, size, player.getOpponentName(), player.getMyName()));
+
+        // Player info
+        this.playerNameLb.setForeground(Color.blue);
+        this.playerNameLb.setText(
+                String.format(CURRENT_USER_INFO,
+                        "You: ", myTurn ? Player.PLAYER_X : Player.PLAYER_O));
+
+        // First turn
+        this.turnLb.setText(Player.PLAYER_X);
+
+        this.setResizable(false);
         this.pack();
+        this.setLocationRelativeTo(null);
+        this.oneBlockSize = gameScene.getPreferredSize().height / size;
+    }
+
+    protected void rematch() {
+        player = player.switchSide();
+        myTurn = player.isInitiate();
+        this.turnLb.setText(Player.PLAYER_X);
+        this.playerNameLb.setText(
+                String.format(CURRENT_USER_INFO,
+                        player.getMyName(), myTurn ? Player.PLAYER_X : Player.PLAYER_O));
+    }
+
+    private void playerMove(Coordinate coordinate) {
+        myTurn = !myTurn;
+        this.turnLb.setText(player.getMyName());
+        this.caroScene.playerMove(coordinate);
+        this.client.sendObject(coordinate);
+    }
+
+    public void opponentMove(Coordinate coordinate) {
+        myTurn = !myTurn;
+        this.turnLb.setText(player.getOpponentName());
+        this.caroScene.opponentMove(coordinate);
+    }
+
+    public void opponentDisconnect() {
+        JOptionPane.showMessageDialog(null, player.getOpponentName() + " has left the game.");
+        this.dispose();
+    }
+
+    private void disconnect() {
+        client.sendObject(new UserDisconnected(
+                player.getMyName(), player.getOpponentName()));
+        this.dispose();
+    }
+
+    private void setLookAndFeel() {
+        try {
+            javax.swing.UIManager.setLookAndFeel(new FlatIntelliJLaf());
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(GameGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
      * Creates new form GameGUI
+     * @param player
+     * @param size
+     * @param client
      */
-    public GameGUI() {
+    public GameGUI(Player player, int size, Client client) {
+        this.player = player;
+        this.size = size;
+        this.client = client;
+
         initComponents();
+        setLookAndFeel();
         createGameScene();
     }
 
@@ -45,7 +133,23 @@ public class GameGUI extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         turnLb = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
+
+        gameScene.addContainerListener(new java.awt.event.ContainerAdapter() {
+            public void componentRemoved(java.awt.event.ContainerEvent evt) {
+                gameSceneComponentRemoved(evt);
+            }
+        });
+        gameScene.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                gameSceneMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout gameSceneLayout = new javax.swing.GroupLayout(gameScene);
         gameScene.setLayout(gameSceneLayout);
@@ -96,40 +200,33 @@ public class GameGUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(GameGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(GameGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(GameGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(GameGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    private void gameSceneMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_gameSceneMouseClicked
+        if (!myTurn) {
+            return;
         }
-        //</editor-fold>
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new GameGUI().setVisible(true);
-            }
-        });
-    }
+        Point point = evt.getPoint();
+
+        // Get Component: GameScene -> CaroScene -> JLabel?
+        Object object = evt.getComponent().getComponentAt(point).getComponentAt(point);
+        if (!(object instanceof JLabel)){
+            return;
+        }
+
+        Coordinate coordinate = new Coordinate(
+                point.x / oneBlockSize,
+                point.y / oneBlockSize,
+                player);
+        this.playerMove(coordinate);
+    }//GEN-LAST:event_gameSceneMouseClicked
+
+    private void gameSceneComponentRemoved(java.awt.event.ContainerEvent evt) {//GEN-FIRST:event_gameSceneComponentRemoved
+        this.disconnect();
+    }//GEN-LAST:event_gameSceneComponentRemoved
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        this.disconnect();
+    }//GEN-LAST:event_formWindowClosing
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel gameScene;

@@ -6,13 +6,14 @@
 package GUI;
 
 import algorithm.CaroGame;
-import java.awt.Color;
+import constant.Constant;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.border.LineBorder;
+import model.Coordinate;
 
 /**
  *
@@ -20,14 +21,17 @@ import javax.swing.border.LineBorder;
  */
 public class CaroScene extends JPanel {
 
-    CaroGame caroGame;
+    private int move;
+    private CaroGame caroGame;
+    private int size;
 
     public CaroScene(int size) {
-        this.setSize(getPanelSize());
-        this.setLayout(new GridLayout(size, size, 10, 10));
+        this.size = size;
+        this.setPreferredSize(getPanelSize());
+        this.setLayout(new GridLayout(size, size, Constant.BLOCK_GAP, Constant.BLOCK_GAP));
         this.caroGame = new CaroGame(size);
-        this.addBlock(size);
-        this.setBorder(new LineBorder(Color.yellow));
+        this.addBlock();
+        move = 0;
     }
 
     /**
@@ -37,10 +41,14 @@ public class CaroScene extends JPanel {
     private Dimension getPanelSize() {
         Dimension screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
 
-        int height = screenDimension.height;
-        int width = screenDimension.width;
+        int height = screenDimension.height / 3 * 2 + Constant.BLOCK_GAP * (size - 1);
+        int width = screenDimension.width / 3 * 2 + Constant.BLOCK_GAP * (size - 1);
+        height = height / constant.Constant.MAX_SIZE * size;
+        width = width / constant.Constant.MAX_SIZE * size;
 
-        return new Dimension(width, height);
+        int finalSize = Math.min(height, width);
+
+        return new Dimension(finalSize, finalSize);
     }
 
     /**
@@ -48,18 +56,58 @@ public class CaroScene extends JPanel {
      *
      * @param size
      */
-    private void addBlock(int size) {
+    private void addBlock() {
         JLabel[][] matrix = caroGame.getMatrix();
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix.length; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 this.add(matrix[i][j]);
-                System.out.println(matrix[i][j].getFont());
             }
         }
     }
 
-    public static void main(String[] args) {
-        CaroScene caroScene = new CaroScene(10);
-        caroScene.caroGame.printMatrix();
+    public void playerMove(Coordinate coordinate) {
+        move++;
+        if (move > size * size) {
+            gameOver("Draw!");
+            return;
+        }
+
+        caroGame.playerMove(coordinate);
+        if (caroGame.checkWin(coordinate)) {
+            gameOver("You win!");
+        }
+    }
+
+    public void opponentMove(Coordinate coordinate) {
+        move++;
+        if (move >= size * size) {
+            gameOver("Draw!");
+            return;
+        }
+
+        caroGame.playerMove(coordinate);
+        if (caroGame.checkWin(coordinate)) {
+            gameOver("You lose!");
+        }
+    }
+
+    private void gameOver(String message) {
+        message += "\n Want to play again?";
+        if (JOptionPane.showConfirmDialog(null, message, "Game over", JOptionPane.YES_NO_OPTION)
+                == JOptionPane.NO_OPTION) {
+            this.getParent().removeAll();
+            return;
+        }
+        startNewGame();
+    }
+
+    private void startNewGame() {
+        caroGame.renewMatrix();
+        move = 0;
+        this.getGameGUI().rematch();
+    }
+
+    private GameGUI getGameGUI() {
+        return (GameGUI) this.getParent().getParent();
     }
 }

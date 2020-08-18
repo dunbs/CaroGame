@@ -5,17 +5,22 @@
  */
 package GUI;
 
+import server.Server;
+
 /**
  *
  * @author conqu
  */
 public class ServerGUI extends javax.swing.JFrame {
 
+    Server server;
+
     /**
      * Creates new form ServerGUI
      */
     public ServerGUI() {
         initComponents();
+        this.setLocationRelativeTo(null);
     }
 
     /**
@@ -27,21 +32,58 @@ public class ServerGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        startServer = new javax.swing.JButton();
+        serverInfo = new javax.swing.JLabel();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
+
+        startServer.setText("Start Server");
+        startServer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                startServerActionPerformed(evt);
+            }
+        });
+
+        serverInfo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        serverInfo.setText("Server is offline!");
+        serverInfo.setToolTipText("");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(130, 130, 130)
+                .addComponent(startServer)
+                .addContainerGap(130, Short.MAX_VALUE))
+            .addComponent(serverInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(startServer)
+                .addGap(32, 32, 32)
+                .addComponent(serverInfo)
+                .addContainerGap(36, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void startServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startServerActionPerformed
+        if (startServer.getText().equals("Start Server")){
+            server = new Server();
+            startServer.setText("Close Server");
+            serverInfo.setText("Server is running on port " + server.getPort());
+            return;
+        }
+        
+        server.close();
+        startServer.setText("Start Server");
+        serverInfo.setText("Server is offline");
+    }//GEN-LAST:event_startServerActionPerformed
 
     /**
      * @param args the command line arguments
@@ -79,5 +121,7 @@ public class ServerGUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel serverInfo;
+    private javax.swing.JButton startServer;
     // End of variables declaration//GEN-END:variables
 }

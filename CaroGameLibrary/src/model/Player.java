@@ -5,29 +5,34 @@
  */
 package model;
 
-import java.awt.Font;
+import java.io.Serializable;
 
 /**
- * Who is making the move? <br>
- * Which font should we use to this game?
+ * Players in the current game
  *
  * @author conqu
  */
-public class Player {
+public class Player implements Serializable {
 
-    public final String PLAYER_X = "X";
-    public final String PLAYER_O = "O";
+    public static final boolean PLAYER_FIRST = true;
+    public static final boolean PLAYER_SECOND = false;
+    public static final String PLAYER_X = "X";
+    public static final String PLAYER_O = "O";
+
+    private boolean initiate;
 
     // X | O
     private String ours;
     private String theirs;
 
-    private Font font;
+    // Name
+    private String myName;
+    private String opponentName;
 
-    public void switchSides() {
-        String temp = ours;
-        ours = theirs;
-        theirs = temp;
+    public Player switchSide() {
+        Player opponent = new Player(myName, opponentName, !initiate);
+        opponent.setOurs(ours.equals(PLAYER_O));
+        return opponent;
     }
 
     public String getOurs() {
@@ -42,16 +47,28 @@ public class Player {
      */
     public void setOurs(boolean ours) {
         this.ours = ours ? PLAYER_X : PLAYER_O;
-        this.ours = ours ? PLAYER_O : PLAYER_X;
+        this.theirs = ours ? PLAYER_O : PLAYER_X;
     }
 
-
-    public Font getFont() {
-        return font;
+    public String getTheirs() {
+        return theirs;
     }
 
-    public void setFont(Font font) {
-        this.font = font;
+    public Player(String myName, String opponentName, boolean initiate) {
+        this.myName = myName;
+        this.opponentName = opponentName;
+        this.initiate = initiate;
     }
 
+    public String getMyName() {
+        return myName;
+    }
+
+    public String getOpponentName() {
+        return opponentName;
+    }
+
+    public boolean isInitiate() {
+        return initiate;
+    }
 }

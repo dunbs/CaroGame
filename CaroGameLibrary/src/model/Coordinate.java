@@ -5,11 +5,13 @@
  */
 package model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author conqu
  */
-public class Coordinate {
+public class Coordinate implements Serializable {
     private int x;
     private int y;
     private final Player player;
@@ -35,4 +37,14 @@ public class Coordinate {
         this.y = y;
         this.player = player;
     }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    @Override
+    public String toString() {
+        return "Coordinate{" + "x=" + x + ", y=" + y + ", player=" + player + '}';
+    }
+
 }
