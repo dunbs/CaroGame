@@ -17,5 +17,5 @@ public class Constant {
 
     public final static int BLOCK_GAP = 10;
 
-    public final static int WIN_LENGTH = 1;
+    public final static int WIN_LENGTH = 5;
 }
