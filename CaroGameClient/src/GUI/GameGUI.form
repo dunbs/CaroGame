@@ -30,11 +30,11 @@
               <EmptySpace pref="32" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <Component id="playerNameLb" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="turnLb" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="playerNameLb" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="gameScene" min="-2" max="-2" attributes="0"/>
               </Group>
@@ -90,7 +90,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="turnLb">
       <Properties>
-        <Property name="text" type="java.lang.String" value=" "/>
+        <Property name="text" type="java.lang.String" value="aasd"/>
       </Properties>
     </Component>
   </SubComponents>

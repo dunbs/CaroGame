@@ -245,7 +245,7 @@ public class Client implements Runnable {
     private void receivedInvitation(Invitation invitation) {
         String opponent = invitation.getFrom();
         int size = invitation.getSize();
-
+        
         String message = Invitation.INVITATION_RECEIVED_MESSAGE;
         message = String.format(message, opponent, size, size);
 

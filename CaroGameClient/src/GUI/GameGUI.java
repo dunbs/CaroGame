@@ -25,8 +25,8 @@ import model.UserDisconnected;
  */
 public class GameGUI extends javax.swing.JFrame {
 
-    public static final String TITLE = "Caro(%dx%d) You are playing against %s as %s";
-    public static final String CURRENT_USER_INFO = "%s: %s";
+    public static final String TITLE = "You are playing against %s";
+    public static final String CURRENT_USER_INFO = "You(%s): %s | Opponent(%s): %s";
 
     private Client client;
     private CaroScene caroScene;
@@ -37,23 +37,22 @@ public class GameGUI extends javax.swing.JFrame {
     private boolean myTurn;
 
     private void createGameScene() {
-        caroScene = new CaroScene(size);
+        caroScene = new CaroScene(size, this);
         gameScene.setLayout(new CardLayout());
         gameScene.add(caroScene);
 
         myTurn = player.isInitiate();
 
         // Title
-        this.setTitle(String.format(TITLE, size, size, player.getOpponentName(), player.getMyName()));
+        this.setTitle(String.format(TITLE,player.getOpponentName()));
 
         // Player info
         this.playerNameLb.setForeground(Color.blue);
-        this.playerNameLb.setText(
-                String.format(CURRENT_USER_INFO,
-                        "You: ", myTurn ? Player.PLAYER_X : Player.PLAYER_O));
+        this.playerNameLb.setText(String.format(CURRENT_USER_INFO, this.player.getOurs(), 
+                this.player.getMyName(), this.player.getTheirs(), this.player.getOpponentName()));
 
         // First turn
-        this.turnLb.setText(Player.PLAYER_X);
+        this.turnLb.setText(myTurn ? player.getMyName() : player.getOpponentName());
 
         this.setResizable(false);
         this.pack();
@@ -64,17 +63,16 @@ public class GameGUI extends javax.swing.JFrame {
     protected void rematch() {
         player = player.switchSide();
         myTurn = player.isInitiate();
-        this.turnLb.setText(Player.PLAYER_X);
-        this.playerNameLb.setText(
-                String.format(CURRENT_USER_INFO,
-                        player.getMyName(), myTurn ? Player.PLAYER_X : Player.PLAYER_O));
+        this.turnLb.setText(myTurn ? player.getOurs() : player.getTheirs());
+        this.playerNameLb.setText(String.format(CURRENT_USER_INFO, this.player.getOurs(), 
+                this.player.getMyName(), this.player.getTheirs(), this.player.getOpponentName()));
     }
 
     private void playerMove(Coordinate coordinate) {
         myTurn = !myTurn;
-        this.turnLb.setText(player.getMyName());
-        this.caroScene.playerMove(coordinate);
+        this.turnLb.setText(myTurn ? player.getOurs() : player.getTheirs());
         this.client.sendObject(coordinate);
+        this.caroScene.playerMove(coordinate);
     }
 
     public void opponentMove(Coordinate coordinate) {
@@ -88,7 +86,7 @@ public class GameGUI extends javax.swing.JFrame {
         this.dispose();
     }
 
-    private void disconnect() {
+    protected void disconnect() {
         client.sendObject(new UserDisconnected(
                 player.getMyName(), player.getOpponentName()));
         this.dispose();
@@ -166,7 +164,7 @@ public class GameGUI extends javax.swing.JFrame {
 
         jLabel2.setText("Turn: ");
 
-        turnLb.setText(" ");
+        turnLb.setText("aasd");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -176,11 +174,11 @@ public class GameGUI extends javax.swing.JFrame {
                 .addContainerGap(32, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(playerNameLb)
-                        .addGap(18, 18, 18)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(turnLb))
+                        .addComponent(turnLb)
+                        .addGap(18, 18, 18)
+                        .addComponent(playerNameLb))
                     .addComponent(gameScene, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(32, 32, 32))
         );

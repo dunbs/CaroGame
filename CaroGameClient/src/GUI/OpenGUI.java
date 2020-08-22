@@ -52,6 +52,11 @@ public class OpenGUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
@@ -145,6 +150,10 @@ public class OpenGUI extends javax.swing.JFrame {
         int size = Integer.parseInt(this.size.getSelectedItem().toString());
         client.invite(opponent, size);
     }//GEN-LAST:event_invitesActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+//        this.client.sendObject(evt);
+    }//GEN-LAST:event_formWindowClosed
 
     /**
      * @param args the command line arguments

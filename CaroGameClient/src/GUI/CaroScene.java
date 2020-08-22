@@ -24,9 +24,11 @@ public class CaroScene extends JPanel {
     private int move;
     private CaroGame caroGame;
     private int size;
+    private GameGUI gameGUI;
 
-    public CaroScene(int size) {
+    public CaroScene(int size, GameGUI gameGUI) {
         this.size = size;
+        this.gameGUI = gameGUI;
         this.setPreferredSize(getPanelSize());
         this.setLayout(new GridLayout(size, size, Constant.BLOCK_GAP, Constant.BLOCK_GAP));
         this.caroGame = new CaroGame(size);
@@ -67,27 +69,31 @@ public class CaroScene extends JPanel {
 
     public void playerMove(Coordinate coordinate) {
         move++;
-        if (move > size * size) {
-            gameOver("Draw!");
-            return;
-        }
 
         caroGame.playerMove(coordinate);
         if (caroGame.checkWin(coordinate)) {
             gameOver("You win!");
+            return;
+        }
+        
+        if (move > size * size) {
+            gameOver("Draw!");
+            return;
         }
     }
 
     public void opponentMove(Coordinate coordinate) {
         move++;
-        if (move >= size * size) {
-            gameOver("Draw!");
-            return;
-        }
 
         caroGame.playerMove(coordinate);
         if (caroGame.checkWin(coordinate)) {
             gameOver("You lose!");
+            return;
+        }
+        
+        if (move >= size * size) {
+            gameOver("Draw!");
+            return;
         }
     }
 
@@ -95,7 +101,7 @@ public class CaroScene extends JPanel {
         message += "\n Want to play again?";
         if (JOptionPane.showConfirmDialog(null, message, "Game over", JOptionPane.YES_NO_OPTION)
                 == JOptionPane.NO_OPTION) {
-            this.getParent().removeAll();
+            this.gameGUI.disconnect();
             return;
         }
         startNewGame();
@@ -104,10 +110,6 @@ public class CaroScene extends JPanel {
     private void startNewGame() {
         caroGame.renewMatrix();
         move = 0;
-        this.getGameGUI().rematch();
-    }
-
-    private GameGUI getGameGUI() {
-        return (GameGUI) this.getParent().getParent();
+        this.gameGUI.rematch();
     }
 }
